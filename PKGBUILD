@@ -75,6 +75,7 @@ prepare() {
             s|@@NAME_SHORT@@|Code - Git|g
             s|@@NAME_LONG@@|Code - Git|g
             s|@@NAME@@|code-git|g
+            s|@@EXEC@@|code-git|g
             s|@@ICON@@|code-git|g
             s|@@LICENSE@@|MIT|g
             s|@@URLPROTOCOL@@|vscode|g
