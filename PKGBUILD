@@ -4,7 +4,7 @@
 
 pkgname=code-git
 pkgdesc='The Open Source build of Visual Studio Code (vscode) editor - git latest'
-pkgver=1.38.0.r1831.g3d3202804b
+pkgver=1.38.0.r2957.g1387f450cc
 pkgrel=1
 arch=('i686' 'x86_64' 'armv7h')
 url='https://github.com/microsoft/vscode'
@@ -52,6 +52,8 @@ pkgver() {
 
 prepare() {
     cd "${srcdir}/vscode"
+
+    git merge origin/electron-7.0.x -m "Merge origin/electron-7.0.x"
 
     # This patch no longer contains proprietary modifications.
     # See https://github.com/Microsoft/vscode/issues/31168 for details.
