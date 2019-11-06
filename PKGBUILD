@@ -4,7 +4,7 @@
 
 pkgname=code-git
 pkgdesc='The Open Source build of Visual Studio Code (vscode) editor - git latest'
-pkgver=1.38.0.r2957.g1387f450cc
+pkgver=1.38.0.r2957.gc9ad2b60bb
 pkgrel=1
 arch=('i686' 'x86_64' 'armv7h')
 url='https://github.com/microsoft/vscode'
@@ -18,12 +18,14 @@ source=("git+https://github.com/Microsoft/vscode"
         "${pkgname}.js"
         "${pkgname}.sh"
         "product_json.diff"
-        "code-liveshare.diff")
+        "code-liveshare.diff"
+        "update_settings.sh")
 sha512sums=('SKIP'
             'a97cbc79d76d2dad2ced74d66fa57b9a0aa3d82767d420b520bbaaf007c03ac60d61134668895ab4a8bd38951974c42afc59c03105ccc892742b34fee9b2c509'
             '9bd93ec7ba946c005d3a12ea71ae2903593d17d3e4dcf55b4a5b612ebc82237338f0aaec59613eb77f355b0116aeb31320d0d32cd993233f140479ced44dfdbf'
             '8ec47e497287d67f37e7b669af416f43d5cdbd4574892867d7b95996ef5de53640b5bc919b06b177e1fd91cb005579d6ed0c17325117b9914ba7cf28f5f06e40'
-            '0bd10ca06dea22854e47fc45d833756ee8d7bf714c88f63feef44e0b0b5da052fba3c27d001865e3389f391cd7b888d92dc0ba44029fa5c736225da3cf2f9a46')
+            '0bd10ca06dea22854e47fc45d833756ee8d7bf714c88f63feef44e0b0b5da052fba3c27d001865e3389f391cd7b888d92dc0ba44029fa5c736225da3cf2f9a46'
+            '74c471c4f0c7cbe734461fb34b62b5e44ae41bf4f53b9a4caef6c833607ef8e5534d98c00a0b97f8170ae1c2c5ac8d09438cda07d0f8c68b4825e3487a70e4ae')
 
 case "$CARCH" in
     i686)
@@ -54,6 +56,8 @@ prepare() {
     cd "${srcdir}/vscode"
 
     git merge origin/electron-7.0.x -m "Merge origin/electron-7.0.x"
+
+    ../update_settings.sh
 
     # This patch no longer contains proprietary modifications.
     # See https://github.com/Microsoft/vscode/issues/31168 for details.
