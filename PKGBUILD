@@ -55,8 +55,6 @@ pkgver() {
 prepare() {
     cd "${srcdir}/vscode"
 
-    git merge origin/electron-7.0.x -m "Merge origin/electron-7.0.x"
-
     ../update_settings.sh
 
     # This patch no longer contains proprietary modifications.
