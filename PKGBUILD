@@ -4,7 +4,7 @@
 
 pkgname=code-git
 pkgdesc='The Open Source build of Visual Studio Code (vscode) editor - git latest'
-pkgver=1.38.0.r2957.gc9ad2b60bb
+pkgver=1.38.0.r4487.gd386b49dee
 pkgrel=1
 arch=('i686' 'x86_64' 'armv7h')
 url='https://github.com/microsoft/vscode'
@@ -92,11 +92,6 @@ prepare() {
 }
 
 build() {
-    # https://github.com/mapbox/node-sqlite3/issues/1044
-    mkdir -p path
-    ln -sf /usr/bin/python2 path/python
-    export PATH="$PWD/path:$PATH"
-
     cd "${srcdir}/vscode"
 
     yarn install --arch=${_vscode_arch}
