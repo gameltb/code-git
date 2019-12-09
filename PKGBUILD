@@ -4,7 +4,7 @@
 
 pkgname=code-git
 pkgdesc='The Open Source build of Visual Studio Code (vscode) editor - git latest'
-pkgver=1.38.0.r4487.gd386b49dee
+pkgver=1.38.0.r4525.ga70c73c7a4
 pkgrel=1
 arch=('i686' 'x86_64' 'armv7h')
 url='https://github.com/microsoft/vscode'
@@ -54,6 +54,12 @@ pkgver() {
 
 prepare() {
     cd "${srcdir}/vscode"
+
+    # dc.services.visualstudio.com
+    # vortex.data.microsoft.com
+    TELEMETRY_URLS="(dc\.services\.visualstudio\.com)|(vortex\.data\.microsoft\.com)"
+    REPLACEMENT="s/$TELEMETRY_URLS/0\.0\.0\.0/g"
+    grep -rl --exclude-dir=.git -E $TELEMETRY_URLS . | xargs sed -i -E $REPLACEMENT
 
     ../update_settings.sh
 
