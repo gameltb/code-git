@@ -1,10 +1,10 @@
 # Maintainer: Michael Hansen <zrax0111 gmail com>
-# Contributor: Francisco Magalhães <franmagneto gmail com>
-# Contributor: Filipe Laíns (FFY00) <lains@archlinux.org>
+# Contributor: Francisco MagalhÃ£es <franmagneto gmail com>
+# Contributor: Filipe LaÃ­ns (FFY00) <lains@archlinux.org>
 
 pkgname=code-git
 pkgdesc='The Open Source build of Visual Studio Code (vscode) editor - git latest'
-pkgver=1.38.0.r4525.ga70c73c7a4
+pkgver=1.38.0.r10872.g9328b32008
 pkgrel=1
 arch=('i686' 'x86_64' 'armv7h')
 url='https://github.com/microsoft/vscode'
@@ -55,6 +55,10 @@ pkgver() {
 prepare() {
     cd "${srcdir}/vscode"
 
+    mkdir -p /tmp/gulp-electron-cache/atom/electron
+    zip /tmp/gulp-electron-cache/atom/electron/electron-`electron -v`-linux-x64.zip README.md
+    zip /tmp/gulp-electron-cache/atom/electron/ffmpeg-`electron -v`-linux-x64.zip README.md
+
     # dc.services.visualstudio.com
     # vortex.data.microsoft.com
     TELEMETRY_URLS="(dc\.services\.visualstudio\.com)|(vortex\.data\.microsoft\.com)"
@@ -100,6 +104,7 @@ prepare() {
 build() {
     cd "${srcdir}/vscode"
 
+    export ELECTRON_SKIP_BINARY_DOWNLOAD=1
     yarn install --arch=${_vscode_arch}
 
     # The default memory limit may be too low for current versions of node
