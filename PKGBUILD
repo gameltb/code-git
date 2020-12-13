@@ -4,13 +4,13 @@
 
 pkgname=code-git
 pkgdesc='The Open Source build of Visual Studio Code (vscode) editor - git latest'
-pkgver=1.38.0.r11542.g756849af075
+pkgver=1.38.0.r20269.g5954c8366d9
 pkgrel=1
 arch=('i686' 'x86_64' 'armv7h')
 url='https://github.com/microsoft/vscode'
 license=('MIT')
 depends=('electron' 'libsecret' 'libx11' 'libxkbfile' 'ripgrep')
-makedepends=('git' 'gulp' 'npm' 'python2' 'yarn' 'nodejs-lts-dubnium')
+makedepends=('git' 'gulp' 'npm' 'python2' 'yarn' 'nodejs-lts-erbium')
 conflicts=('visual-studio-code-git')
 provides=('visual-studio-code-git')
 
@@ -24,7 +24,7 @@ sha512sums=('SKIP'
             'a97cbc79d76d2dad2ced74d66fa57b9a0aa3d82767d420b520bbaaf007c03ac60d61134668895ab4a8bd38951974c42afc59c03105ccc892742b34fee9b2c509'
             '9bd93ec7ba946c005d3a12ea71ae2903593d17d3e4dcf55b4a5b612ebc82237338f0aaec59613eb77f355b0116aeb31320d0d32cd993233f140479ced44dfdbf'
             '8ec47e497287d67f37e7b669af416f43d5cdbd4574892867d7b95996ef5de53640b5bc919b06b177e1fd91cb005579d6ed0c17325117b9914ba7cf28f5f06e40'
-            '7cfc18fdb7a1f698c6b9c61f5d12ceee203094a89c5c73448a8482a63039ed2957b03ed14625e1f36a19c608b18c88f63519d537f7b1cc24358a25c36f0ac574'
+            'a9f2f3e07f8ffe9def036cb2aa6d587444ea1cf9d9e1b29637b3d86ccf98e3ee2c50d219405155449c06654f753a296a820b11bdab48928baf25043217f149a0'
             '74c471c4f0c7cbe734461fb34b62b5e44ae41bf4f53b9a4caef6c833607ef8e5534d98c00a0b97f8170ae1c2c5ac8d09438cda07d0f8c68b4825e3487a70e4ae')
 
 case "$CARCH" in
@@ -58,6 +58,12 @@ prepare() {
     mkdir -p /tmp/gulp-electron-cache/atom/electron
     zip /tmp/gulp-electron-cache/atom/electron/electron-`electron -v`-linux-x64.zip README.md
     zip /tmp/gulp-electron-cache/atom/electron/ffmpeg-`electron -v`-linux-x64.zip README.md
+
+    zip /tmp/gulp-electron-cache/atom/electron/electron-v7.2.4-linux-x64.zip README.md
+    zip /tmp/gulp-electron-cache/atom/electron/ffmpeg-v7.2.4-linux-x64.zip README.md
+
+    mkdir -p /tmp/vscode-ripgrep-cache-1.5.8
+    cp ../../ripgrep-v11.0.1-2-x86_64-unknown-linux-musl.tar.gz /tmp/vscode-ripgrep-cache-1.5.8/
 
     # dc.services.visualstudio.com
     # vortex.data.microsoft.com
@@ -113,7 +119,7 @@ build() {
     # command line if the default still doesn't work for your system.
     _mem_limit="--max_old_space_size=$mem_limit"
 
-    if ! /usr/bin/node $_mem_limit /usr/bin/gulp vscode-linux-${_vscode_arch}-min
+    if ! /usr/bin/node $_mem_limit /usr/bin/gulp vscode-linux-${_vscode_arch}
     then
         echo
         echo "*** NOTE: If the build failed due to running out of file handles (EMFILE),"
