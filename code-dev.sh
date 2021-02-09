@@ -1,3 +1,3 @@
 #!/bin/bash
-
-ELECTRON_RUN_AS_NODE=1 exec electron ./src/vscode/out/cli.js ./code-git.js "$@"
+VSDIR=$(dirname $0)
+exec electron $VSDIR/src/vscode/out/cli.js $VSDIR/src/vscode/code-git.js "$@"

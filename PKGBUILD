@@ -1,16 +1,20 @@
 # Maintainer: Michael Hansen <zrax0111 gmail com>
-# Contributor: Francisco MagalhÃ£es <franmagneto gmail com>
-# Contributor: Filipe LaÃ­ns (FFY00) <lains@archlinux.org>
+# Contributor: Francisco Magalhães <franmagneto gmail com>
+# Contributor: Filipe Laíns (FFY00) <lains@archlinux.org>
 
 pkgname=code-git
 pkgdesc='The Open Source build of Visual Studio Code (vscode) editor - git latest'
-pkgver=1.38.0.r20269.g5954c8366d9
+_electron=electron
+pkgver=1.54.0.r76484.gafd102cbd2e
 pkgrel=1
 arch=('i686' 'x86_64' 'armv7h')
 url='https://github.com/microsoft/vscode'
 license=('MIT')
-depends=('electron' 'libsecret' 'libx11' 'libxkbfile' 'ripgrep')
-makedepends=('git' 'gulp' 'npm' 'python2' 'yarn' 'nodejs-lts-erbium')
+depends=("$_electron" 'libsecret' 'libx11' 'libxkbfile' 'ripgrep')
+optdepends=('bash-completion: Bash completions'
+            'zsh-completions: ZSH completitons'
+            'x11-ssh-askpass: SSH authentication')
+makedepends=('git' 'gulp' 'npm' 'python2' 'yarn' 'nodejs-lts-fermium')
 conflicts=('visual-studio-code-git')
 provides=('visual-studio-code-git')
 
@@ -49,21 +53,20 @@ fi
 
 pkgver() {
     cd "${srcdir}/vscode"
-    git describe --tags --match '?.*' | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+    # People love to complain, so here's a complex version that still
+    # increases monotonically by commit but also has the package.json
+    # version instead of the most recent tag...
+    printf "%s.r%s.g%s" \
+        "$(awk 'match($0,/"version":\s*"([^"]+)"/,v) {print v[1]}' package.json)" \
+        "$(git rev-list --count HEAD)" \
+        "$(git rev-parse --short HEAD)"
 }
 
 prepare() {
     cd "${srcdir}/vscode"
 
-    mkdir -p /tmp/gulp-electron-cache/atom/electron
-    zip /tmp/gulp-electron-cache/atom/electron/electron-`electron -v`-linux-x64.zip README.md
-    zip /tmp/gulp-electron-cache/atom/electron/ffmpeg-`electron -v`-linux-x64.zip README.md
-
-    zip /tmp/gulp-electron-cache/atom/electron/electron-v7.2.4-linux-x64.zip README.md
-    zip /tmp/gulp-electron-cache/atom/electron/ffmpeg-v7.2.4-linux-x64.zip README.md
-
-    mkdir -p /tmp/vscode-ripgrep-cache-1.5.8
-    cp ../../ripgrep-v11.0.1-2-x86_64-unknown-linux-musl.tar.gz /tmp/vscode-ripgrep-cache-1.5.8/
+    # Change electron binary name to the target electron
+    sed -i "s|exec electron |exec $_electron |" ../code-git.sh
 
     # dc.services.visualstudio.com
     # vortex.data.microsoft.com
@@ -87,7 +90,7 @@ prepare() {
     patch -p1 -i "${srcdir}/code-liveshare.diff"
 
     # Build native modules for system electron
-    local _target=$(</usr/lib/electron/version)
+    local _target=$(</usr/lib/$_electron/version)
     sed -i "s/^target .*/target \"${_target//v/}\"/" .yarnrc
 
     # Patch appdata and desktop file
@@ -95,15 +98,19 @@ prepare() {
             s|@@NAME_SHORT@@|Code - Git|g
             s|@@NAME_LONG@@|Code - Git|g
             s|@@NAME@@|code-git|g
-            s|@@EXEC@@|code-git|g
             s|@@ICON@@|code-git|g
+            s|@@EXEC@@|/usr/bin/code-git|g
             s|@@LICENSE@@|MIT|g
             s|@@URLPROTOCOL@@|vscode|g
-            s|inode/directory;||' resources/linux/code.{appdata.xml,desktop}
+            s|inode/directory;||' resources/linux/code{.appdata.xml,.desktop,-url-handler.desktop}
 
+    sed -i 's|MimeType=.*|MimeType=x-scheme-handler/code-git;|' resources/linux/code-url-handler.desktop
+
+    # Patch completitions with correct names
+    sed -i 's|@@APPNAME@@|code-git|g' resources/completions/{bash/code,zsh/_code}
     # Fix bin path
-    sed -i "s|return path.join(path.dirname(execPath), 'bin', \`\${product.applicationName}\`);|return '/usr/bin/${pkgname}';|g
-            s|return path.join(appRoot, 'scripts', 'code-cli.sh');|return '/usr/bin/${pkgname}';|g" \
+    sed -i "s|return path.join(path.dirname(execPath), 'bin', \`\${product.applicationName}\`);|return '/usr/bin/code-git';|g
+            s|return path.join(appRoot, 'scripts', 'code-cli.sh');|return '/usr/bin/code-git';|g" \
         src/vs/platform/environment/node/environmentService.ts
 }
 
@@ -136,7 +143,7 @@ package() {
         VSCode-linux-${_vscode_arch}/resources/app/* \
         "${pkgdir}/usr/lib/${pkgname}"
 
-    # Replace statically included binary with system version
+    # Replace statically included binary with system copy
     ln -sf /usr/bin/rg \
             "${pkgdir}/usr/lib/${pkgname}/node_modules.asar.unpacked/vscode-ripgrep/bin/rg"
 
@@ -149,8 +156,16 @@ package() {
             "${pkgdir}/usr/share/metainfo/${pkgname}.appdata.xml"
     install -Dm 644 vscode/resources/linux/code.desktop \
             "${pkgdir}/usr/share/applications/${pkgname}.desktop"
+    install -Dm 644 vscode/resources/linux/code-url-handler.desktop \
+            "${pkgdir}/usr/share/applications/${pkgname}-url-handler.desktop"
     install -Dm 644 VSCode-linux-${_vscode_arch}/resources/app/resources/linux/code.png \
             "${pkgdir}/usr/share/pixmaps/${pkgname}.png"
+
+    # Install bash and zsh completions
+    install -Dm 644 vscode/resources/completions/bash/code \
+            "${pkgdir}/usr/share/bash-completion/completions/${pkgname}"
+    install -Dm 644 vscode/resources/completions/zsh/_code \
+            "${pkgdir}/usr/share/zsh/site-functions/_${pkgname}"
 
     # Install license files
     install -Dm 644 "${srcdir}/VSCode-linux-${_vscode_arch}/resources/app/LICENSE.txt" \
