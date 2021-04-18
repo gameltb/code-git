@@ -5,7 +5,7 @@
 pkgname=code-git
 pkgdesc='The Open Source build of Visual Studio Code (vscode) editor - git latest'
 _electron=electron
-pkgver=1.54.0.r76484.gafd102cbd2e
+pkgver=1.56.0.r80375.g8e43ae3087e
 pkgrel=1
 arch=('i686' 'x86_64' 'armv7h')
 url='https://github.com/microsoft/vscode'
